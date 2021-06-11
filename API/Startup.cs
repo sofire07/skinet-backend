@@ -5,6 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
+using API.Helpers;
 using Repository;
 using Repository.Interfaces;
 
@@ -24,8 +25,13 @@ namespace API
         {
             services.AddDbContext<ApplicationDbContext>(
                 x=> x.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
-            services.AddControllers();
+
+            services.AddAutoMapper(typeof(MappingProfiles));
+            
             services.AddScoped<IProductsRepo, ProductsRepo>();
+            services.AddScoped(typeof(IGenericRepo<>), typeof(GenericRepo<>));
+
+            services.AddControllers();
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "API", Version = "v1" });
@@ -45,6 +51,7 @@ namespace API
             app.UseHttpsRedirection();
 
             app.UseRouting();
+            app.UseStaticFiles();
 
             app.UseAuthorization();
 
