@@ -14,5 +14,7 @@ namespace Repository.Interfaces
         Task<IReadOnlyList<T>> GetAllAsync();
         Task<T> GetEntityWithSpec(ISpecification<T> spec);
         Task<IReadOnlyList<T>> GetAllAsyncWithSpec(ISpecification<T> spec);
+        Task<int> CountAsync(ISpecification<T> spec);
+        
     }
 }

@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using API.Helpers;
 
 namespace API.Controllers
 {
@@ -34,11 +35,16 @@ namespace API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IReadOnlyList<ProductToReturnDto>>> GetAllProducts()
+        public async Task<ActionResult<Pagination<ProductToReturnDto>>> GetAllProducts([FromQuery]ProductSpecParams productParams)
         {
-            var products = await _productsRepo.GetAllAsyncWithSpec(new ProductsWithTypesAndBrandsSpecification());
+            var spec = new ProductsWithTypesAndBrandsSpecification(productParams);
+            var countSpec = new ProductsWithFiltersForCountSpecification(productParams);
+            var totalItems = await _productsRepo.CountAsync(countSpec);
 
-            return Ok(products.Select(product => _mapper.Map<ProductToReturnDto>(product)));
+            var products = await _productsRepo.GetAllAsyncWithSpec(spec);
+            var data = products.Select(product => _mapper.Map<ProductToReturnDto>(product));
+
+            return Ok(new Pagination<ProductToReturnDto>(productParams.PageIndex, productParams.PageSize, totalItems, data));
         }
 
         [HttpGet("{id}")]
